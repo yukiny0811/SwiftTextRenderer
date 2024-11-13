@@ -6,8 +6,6 @@
 //  Copyright © 2020 iShape. All rights reserved.
 //
 
-import SimpleSimdSwift
-
 public struct Triangle {
     
     public let a: f2

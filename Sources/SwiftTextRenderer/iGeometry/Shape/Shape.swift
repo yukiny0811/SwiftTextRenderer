@@ -6,8 +6,6 @@
 //  Copyright © 2019 iShape. All rights reserved.
 //
 
-import SimpleSimdSwift
-
 public struct Shape {
     
     public static let empty = Shape(hull: [], holes: [])
