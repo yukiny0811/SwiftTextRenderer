@@ -123,6 +123,7 @@ open class PathText {
         CTFrameGetLineOrigins(frame, CFRangeMake(0, 0), &origins)
         return origins
     }
+    var advances: CGSize?
     var attributedText: CFAttributedString? {
         // Text Attributes
         let attributes: [NSAttributedString.Key: Any] = [
@@ -208,12 +209,16 @@ open class PathText {
                 CTRunGetPositions(run, CFRangeMake(0, 0), glyphPositions)
                 let glyphs = UnsafeMutablePointer<CGGlyph>.allocate(capacity: glyphCount)
                 CTRunGetGlyphs(run, CFRangeMake(0, 0), glyphs)
+                let advances = UnsafeMutablePointer<CGSize>.allocate(capacity: glyphCount)
+                CTRunGetAdvances(run, CFRangeMake(0, 0), advances)
+                self.advances = advances.pointee
                 for glyphIndex in 0 ..< glyphCount {
                     let glyph = glyphs[glyphIndex]
                     let glyphPosition = glyphPositions[glyphIndex]
                     addGlyphGeometryData(glyph, glyphPosition, origin, maxDepth: maxDepth)
                     charOffset += 1
                 }
+                advances.deallocate()
                 glyphPositions.deallocate()
                 glyphs.deallocate()
             }

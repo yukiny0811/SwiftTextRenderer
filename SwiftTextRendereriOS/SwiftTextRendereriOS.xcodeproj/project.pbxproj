@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		56B02E582CE4798D00F9B210 /* EasyMetalShader in Frameworks */ = {isa = PBXBuildFile; productRef = 56B02E572CE4798D00F9B210 /* EasyMetalShader */; };
+		56B02E5B2CE47DA000F9B210 /* SwiftTextRenderer in Frameworks */ = {isa = PBXBuildFile; productRef = 56B02E5A2CE47DA000F9B210 /* SwiftTextRenderer */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		56B02E212CE45C5E00F9B210 /* SwiftTextRendereriOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftTextRendereriOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				56B02E5B2CE47DA000F9B210 /* SwiftTextRenderer in Frameworks */,
+				56B02E582CE4798D00F9B210 /* EasyMetalShader in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +72,8 @@
 			);
 			name = SwiftTextRendereriOS;
 			packageProductDependencies = (
+				56B02E572CE4798D00F9B210 /* EasyMetalShader */,
+				56B02E5A2CE47DA000F9B210 /* SwiftTextRenderer */,
 			);
 			productName = SwiftTextRendereriOS;
 			productReference = 56B02E212CE45C5E00F9B210 /* SwiftTextRendereriOS.app */;
@@ -94,6 +103,10 @@
 			);
 			mainGroup = 56B02E182CE45C5E00F9B210;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				56B02E562CE4798D00F9B210 /* XCRemoteSwiftPackageReference "EasyMetalShader" */,
+				56B02E592CE47DA000F9B210 /* XCLocalSwiftPackageReference "../../SwiftTextRenderer" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 56B02E222CE45C5E00F9B210 /* Products */;
 			projectDirPath = "";
@@ -324,6 +337,36 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		56B02E592CE47DA000F9B210 /* XCLocalSwiftPackageReference "../../SwiftTextRenderer" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../SwiftTextRenderer;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		56B02E562CE4798D00F9B210 /* XCRemoteSwiftPackageReference "EasyMetalShader" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yukiny0811/EasyMetalShader";
+			requirement = {
+				kind = exactVersion;
+				version = 3.2.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		56B02E572CE4798D00F9B210 /* EasyMetalShader */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 56B02E562CE4798D00F9B210 /* XCRemoteSwiftPackageReference "EasyMetalShader" */;
+			productName = EasyMetalShader;
+		};
+		56B02E5A2CE47DA000F9B210 /* SwiftTextRenderer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftTextRenderer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 56B02E192CE45C5E00F9B210 /* Project object */;
 }
