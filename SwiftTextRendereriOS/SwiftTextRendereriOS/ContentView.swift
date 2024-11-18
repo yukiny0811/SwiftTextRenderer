@@ -57,10 +57,17 @@ struct ContentView: View {
                     }
                 }
                 .onChange(of: fontName) {
-                    renderer.textRenderer = TextRenderer(fontName: fontName)
-                    renderer.textRenderer.cacheCaracters(from: "あいうえお桑島yeah")
+                    reset()
+                }
+                .onAppear {
+                    reset()
                 }
         }
+    }
+
+    func reset() {
+        renderer.textRenderer = TextRenderer(fontName: fontName, fontSize: 120)
+        renderer.textRenderer.cacheCaracters(from: "あいうえお桑島yeah")
     }
 
     func getAvailableFonts() -> [String] {
