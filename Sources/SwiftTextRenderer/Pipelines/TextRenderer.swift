@@ -291,6 +291,12 @@ public class TextRenderer {
         self.customMatrix[self.customMatrix.count - 1] = self.customMatrix[self.customMatrix.count - 1] * translateMatrix
         setCustomMatrix(encoder: encoder)
     }
+    
+    public func scale(_ value: f3, encoder: MTLRenderCommandEncoder) {
+        let scaleMatrix = f4x4.createScale(value.x, value.y, value.z)
+        self.customMatrix[self.customMatrix.count - 1] = self.customMatrix[self.customMatrix.count - 1] * scaleMatrix
+        setCustomMatrix(encoder: encoder)
+    }
 
     public func pushMatrix(encoder: MTLRenderCommandEncoder) {
         self.customMatrix.append(f4x4.createIdentity())
