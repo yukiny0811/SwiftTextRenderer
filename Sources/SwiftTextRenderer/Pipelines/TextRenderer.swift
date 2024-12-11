@@ -22,7 +22,7 @@ public enum TextRendererUtils {
 
     private static let mainVertFunction: MTLFunction = ShaderUtils.library.makeFunction(name: "mainVert")!
     private static let mainFragFunction: MTLFunction = ShaderUtils.library.makeFunction(name: "mainFrag")!
-    internal static let mainPipelineState: MTLRenderPipelineState = {
+    public static let mainPipelineState: MTLRenderPipelineState = {
         let desc: MTLRenderPipelineDescriptor = MTLRenderPipelineDescriptor()
         desc.vertexFunction = mainVertFunction
         desc.fragmentFunction = mainFragFunction
@@ -35,7 +35,7 @@ public enum TextRendererUtils {
 public class TextRenderer {
 
     private let factory: TextFactory
-    private var customMatrix: [f4x4] = [f4x4.createIdentity()]
+    private(set) public var customMatrix: [f4x4] = [f4x4.createIdentity()]
 
     public init(
         fontName: String = "HiraginoSans-W3",

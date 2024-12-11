@@ -9,8 +9,8 @@ import simd
 
 public struct Camera {
 
-    let frameWidth: Float
-    let frameHeight: Float
+    public let frameWidth: Float
+    public let frameHeight: Float
     private let fovInDegrees: Float
     private let near: Float
     private let far: Float
