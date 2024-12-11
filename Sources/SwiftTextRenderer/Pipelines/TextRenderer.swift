@@ -314,7 +314,7 @@ public class TextRenderer {
         popMatrix(encoder: encoder)
     }
 
-    private func setCustomMatrix(encoder: MTLRenderCommandEncoder) {
+    public func setCustomMatrix(encoder: MTLRenderCommandEncoder) {
         encoder.setVertexBytes(
             [self.customMatrix.reduce(f4x4.createIdentity(), *)],
             length: f4x4.memorySize,
