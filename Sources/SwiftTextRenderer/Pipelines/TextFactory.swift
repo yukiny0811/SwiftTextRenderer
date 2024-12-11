@@ -9,6 +9,7 @@ import Foundation
 import CoreText
 import CoreGraphics
 import Metal
+import simd
 
 public class TextFactory {
 
@@ -42,7 +43,12 @@ public class TextFactory {
         }
         let characterPath = path.glyphLines.flatMap { $0.map { $0 + path.offset } }
         let pathBuffer = ShaderUtils.device.makeBuffer(bytes: characterPath, length: characterPath.count * f3.memorySize)!
+        
+        let characterBorderPath = vectorText.calculatedPaths.flatMap { letterPath in
+            letterPath.glyphs
+        }
         cached[char] = LetterCache(
+            borderPath: characterBorderPath,
             buffer: pathBuffer,
             verticeCount: characterPath.count,
             offset: f2(offset.x, offset.y),

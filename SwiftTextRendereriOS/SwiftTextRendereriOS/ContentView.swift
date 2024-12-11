@@ -22,20 +22,35 @@ class MyRenderer: ShaderRenderer {
     override func draw(view: MTKView, drawable: any CAMetalDrawable) {
         view.drawableSize = .init(width: view.frame.width * 2, height: view.frame.height * 2)
         let commandBuffer = ShaderCore.commandQueue.makeCommandBuffer()!
-//        textRenderer.render("あいう", color: f4(1, 1, 1, 1), commandBuffer: commandBuffer, view: view)
-        textRenderer.render(
-            "yeah",
-            color: f4(1, 1, 1, 1),
+        
+        textRenderer.renderText(
             commandBuffer: commandBuffer,
             camera: Camera(
                 width: Float(drawable.texture.width),
                 height: Float(drawable.texture.height),
-                translation: f3(0, 0, -30),
+                translation: f3(0, 0, -100),
                 rotationAngle: 0,
                 rotationAxis: f3(1, 0, 0)
             ),
             renderPassDescriptor: view.currentRenderPassDescriptor!
-        )
+        ) { encoder in
+            textRenderer.renderText(
+                encoder: encoder,
+                "yeah",
+                color: f4(1, 1, 1, 1),
+                drawBorder: false,
+                borderWidth: 1,
+                primitiveType: .triangle
+            )
+            textRenderer.renderText(
+                encoder: encoder,
+                "yeah",
+                color: f4(0.5, 0.8, 1, 1),
+                drawBorder: true,
+                borderWidth: 1,
+                primitiveType: .triangle
+            )
+        }
         commandBuffer.present(drawable)
         commandBuffer.commit()
     }
@@ -66,7 +81,7 @@ struct ContentView: View {
     }
 
     func reset() {
-        renderer.textRenderer = TextRenderer(fontName: fontName, fontSize: 120)
+        renderer.textRenderer = TextRenderer(fontName: fontName, fontSize: 24)
         renderer.textRenderer.cacheCaracters(from: "あいうえお桑島yeah")
     }
 

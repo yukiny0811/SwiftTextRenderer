@@ -8,6 +8,8 @@
 import Metal
 
 public struct LetterCache {
+    public var borderPath: [GlyphLine]
+    
     public var buffer: MTLBuffer
     public var verticeCount: Int
     public var offset: f2

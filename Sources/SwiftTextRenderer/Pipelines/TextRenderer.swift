@@ -69,13 +69,49 @@ public class TextRenderer {
             factory.cacheCharacter(char: c)
         }
     }
+    
+    public func renderText(
+        commandBuffer: MTLCommandBuffer,
+        camera: Camera,
+        renderPassDescriptor: MTLRenderPassDescriptor,
+        process: (_ encoder: MTLRenderCommandEncoder) -> ()
+    ) {
+        customMatrix = [f4x4.createIdentity()]
+        guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
+            return
+        }
+        encoder.setRenderPipelineState(TextRendererUtils.mainPipelineState)
+        encoder.setViewport(
+            MTLViewport(
+                originX: 0,
+                originY: 0,
+                width: Double(camera.frameWidth) * Double(1),
+                height: Double(camera.frameHeight) * Double(1),
+                znear: -1,
+                zfar: 1
+            )
+        )
+        encoder.setVertexBytes([camera.perspectiveMatrix], length: f4x4.memorySize, index: 13)
+        encoder.setVertexBytes([camera.viewMatrix], length: f4x4.memorySize, index: 14)
+        encoder.setVertexBytes([self.customMatrix.reduce(f4x4.createIdentity(), *)], length: f4x4.memorySize, index: 15)
+        process(encoder)
+        encoder.endEncoding()
+    }
+    
+    public func renderText(encoder: MTLRenderCommandEncoder, _ str: String, color: f4, drawBorder: Bool, borderWidth: Float, primitiveType: MTLPrimitiveType) {
+        encoder.setVertexBytes([color], length: f4.memorySize, index: 16)
+        text(encoder: encoder, str, factory: factory, primitiveType: primitiveType, drawBorder: drawBorder, borderWidth: borderWidth)
+    }
 
     public func render(
         _ str: String,
         color: f4,
         commandBuffer: MTLCommandBuffer,
         camera: Camera,
-        renderPassDescriptor: MTLRenderPassDescriptor
+        renderPassDescriptor: MTLRenderPassDescriptor,
+        primitiveType: MTLPrimitiveType,
+        drawBorder: Bool = false,
+        borderWidth: Float
     ) {
         customMatrix = [f4x4.createIdentity()]
         guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
@@ -96,7 +132,7 @@ public class TextRenderer {
         encoder.setVertexBytes([camera.viewMatrix], length: f4x4.memorySize, index: 14)
         encoder.setVertexBytes([self.customMatrix.reduce(f4x4.createIdentity(), *)], length: f4x4.memorySize, index: 15)
         encoder.setVertexBytes([color], length: f4.memorySize, index: 16)
-        text(encoder: encoder, str, factory: factory)
+        text(encoder: encoder, str, factory: factory, primitiveType: primitiveType, drawBorder: drawBorder, borderWidth: borderWidth)
         encoder.endEncoding()
     }
 
@@ -104,7 +140,10 @@ public class TextRenderer {
         _ str: String,
         color: f4,
         commandBuffer: MTLCommandBuffer,
-        view: MTKView
+        view: MTKView,
+        primitiveType: MTLPrimitiveType,
+        drawBorder: Bool = false,
+        borderWidth: Float
     ) {
         guard let drawable = view.currentDrawable else {
             return
@@ -120,7 +159,10 @@ public class TextRenderer {
             color: color,
             commandBuffer: commandBuffer,
             camera: camera,
-            renderPassDescriptor: renderPassDescriptor
+            renderPassDescriptor: renderPassDescriptor,
+            primitiveType: primitiveType,
+            drawBorder: drawBorder,
+            borderWidth: borderWidth
         )
     }
 
@@ -129,6 +171,8 @@ public class TextRenderer {
         _ character: Character,
         factory: TextFactory,
         primitiveType: MTLPrimitiveType = .triangle,
+        drawBorder: Bool = false,
+        borderWidth: Float,
         applyTransformBefore: ((_ advances: f2, _ offset: f2, _ size: f2) -> ())? = nil,
         applyTransformAfter: ((_ advances: f2, _ offset: f2, _ size: f2) -> ())? = nil
     ) {
@@ -137,15 +181,78 @@ public class TextRenderer {
             encoder.setVertexBytes([f3.zero], length: f3.memorySize, index: 10)
             encoder.setVertexBytes([f3.zero], length: f3.memorySize, index: 11)
             encoder.setVertexBytes([f3.one], length: f3.memorySize, index: 12)
-            encoder.setVertexBuffer(cached.buffer, offset: 0, index: 0)
-            encoder.drawPrimitives(type: primitiveType, vertexStart: 0, vertexCount: cached.verticeCount)
+            if drawBorder {
+                let buffers = cached.borderPath.map { glyph in
+                    let widthedBorderPath = createPathWithBorderWidth(path: glyph.map { $0 + cached.offset }, width: borderWidth)
+                    return ShaderUtils.device.makeBuffer(bytes: widthedBorderPath.map { f3($0.x, $0.y, 0) }, length: widthedBorderPath.count * f3.memorySize)!
+                }
+                for border in buffers {
+                    encoder.setVertexBuffer(border, offset: 0, index: 0)
+                    encoder.drawPrimitives(type: primitiveType, vertexStart: 0, vertexCount: border.length / f3.memorySize)
+                }
+            } else {
+                encoder.setVertexBuffer(cached.buffer, offset: 0, index: 0)
+                encoder.drawPrimitives(type: primitiveType, vertexStart: 0, vertexCount: cached.verticeCount)
+            }
             applyTransformAfter?(cached.advances, cached.offset, cached.size)
         } else {
             print("no caches for \(character)")
         }
     }
+    
+    func createPathWithBorderWidth(path: [simd_float2], width: Float) -> [simd_float2] {
+        guard path.count > 2 else {
+            return []
+        }
+        let closedPath = path
+        let halfWidth = width * 0.5
+        var normals: [simd_float2] = []
+        normals.reserveCapacity(closedPath.count)
+        for i in 0..<closedPath.count {
+            let current = closedPath[i]
+            let next = closedPath[(i + 1) % closedPath.count]
+            let edge = next - current
+            let normal = simd_normalize(simd_float2(-edge.y, edge.x))
+            normals.append(normal)
+        }
+        var vertexNormals: [simd_float2] = []
+        vertexNormals.reserveCapacity(closedPath.count)
+        for i in 0..<closedPath.count {
+            let prevN = normals[(i - 1 + closedPath.count) % closedPath.count]
+            let currN = normals[i]
+            var vn = prevN + currN
+            let length = simd_length(vn)
+            if length > 1e-6 {
+                vn = vn / length
+            } else {
+                vn = currN
+            }
+            vertexNormals.append(vn)
+        }
+        let outerPath = zip(closedPath, vertexNormals).map { $0 + $1 * halfWidth }
+        let innerPath = zip(closedPath, vertexNormals).map { $0 - $1 * halfWidth }
+        var triangles: [simd_float2] = []
+        for i in 0..<closedPath.count {
+            let iNext = (i + 1) % closedPath.count
+            
+            let p0 = innerPath[i]
+            let p1 = outerPath[i]
+            let p2 = outerPath[iNext]
+            let p3 = innerPath[iNext]
+            
+            triangles.append(p0)
+            triangles.append(p1)
+            triangles.append(p2)
+            
+            triangles.append(p0)
+            triangles.append(p2)
+            triangles.append(p3)
+        }
+        
+        return triangles
+    }
 
-    func text(encoder: MTLRenderCommandEncoder, _ str: String, factory: TextFactory, primitiveType: MTLPrimitiveType = .triangle) {
+    func text(encoder: MTLRenderCommandEncoder, _ str: String, factory: TextFactory, primitiveType: MTLPrimitiveType = .triangle, drawBorder: Bool = false, borderWidth: Float) {
         push(encoder: encoder) {
             if str.isEmpty { return }
             let spacerFactor: Float = factory.cached[str.first!]?.advances.x ?? 0
@@ -164,7 +271,7 @@ public class TextRenderer {
                     translate(f3(spacerFactor, 0, 0), encoder: encoder)
                     continue
                 }
-                char(encoder: encoder, c, factory: factory, primitiveType: primitiveType) { advances, offset, size in
+                char(encoder: encoder, c, factory: factory, primitiveType: primitiveType, drawBorder: drawBorder, borderWidth: borderWidth) { advances, offset, size in
 
                 } applyTransformAfter: { advances, offset, size in
                     self.translate(f3(advances.x, 0, 0), encoder: encoder)
