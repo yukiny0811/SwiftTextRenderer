@@ -280,29 +280,29 @@ public class TextRenderer {
         }
     }
 
-    private func rotate(encoder: MTLRenderCommandEncoder, _ rad: Float, axis: f3) {
+    public func rotate(encoder: MTLRenderCommandEncoder, _ rad: Float, axis: f3) {
         let rotateMatrix = f4x4.createRotation(angle: rad, axis: axis)
         self.customMatrix[self.customMatrix.count - 1] = self.customMatrix[self.customMatrix.count - 1] * rotateMatrix
         setCustomMatrix(encoder: encoder)
     }
 
-    private func translate(_ value: f3, encoder: MTLRenderCommandEncoder) {
+    public func translate(_ value: f3, encoder: MTLRenderCommandEncoder) {
         let translateMatrix = f4x4.createTranslation(value.x, value.y, value.z)
         self.customMatrix[self.customMatrix.count - 1] = self.customMatrix[self.customMatrix.count - 1] * translateMatrix
         setCustomMatrix(encoder: encoder)
     }
 
-    private func pushMatrix(encoder: MTLRenderCommandEncoder) {
+    public func pushMatrix(encoder: MTLRenderCommandEncoder) {
         self.customMatrix.append(f4x4.createIdentity())
         setCustomMatrix(encoder: encoder)
     }
 
-    private func popMatrix(encoder: MTLRenderCommandEncoder) {
+    public func popMatrix(encoder: MTLRenderCommandEncoder) {
         let _ = self.customMatrix.popLast()
         setCustomMatrix(encoder: encoder)
     }
 
-    private func push(encoder: MTLRenderCommandEncoder, _ process: () -> Void) {
+    public func push(encoder: MTLRenderCommandEncoder, _ process: () -> Void) {
         pushMatrix(encoder: encoder)
         process()
         popMatrix(encoder: encoder)
