@@ -167,7 +167,7 @@ public class TextRenderer {
         )
     }
 
-    func char(
+    public func char(
         encoder: MTLRenderCommandEncoder,
         _ character: Character,
         factory: TextFactory,
