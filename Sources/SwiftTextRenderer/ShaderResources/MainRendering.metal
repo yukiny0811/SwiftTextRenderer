@@ -24,7 +24,7 @@ vertex RasterizerData mainVert
     float4x4 modelMatrix = createModelMatrix(modelPos, modelRot, modelScale, customMatrix);
 
     RasterizerData rd;
-    rd.position = projectionMatrix * viewMatrix * modelMatrix * float4(vIn.position, 1.0);
+    rd.position = projectionMatrix * viewMatrix * customMatrix * modelMatrix * float4(vIn.position, 1.0);
     rd.color = modelColor;
     return rd;
 }
