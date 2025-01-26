@@ -35,8 +35,8 @@ public enum TextRendererUtils {
 
 public class TextRenderer {
 
-    private let factory: TextFactory
-    private(set) public var customMatrix: [f4x4] = [f4x4.createIdentity()]
+    public let factory: TextFactory
+    public var customMatrix: [f4x4] = [f4x4.createIdentity()]
 
     public init(
         fontName: String = "HiraginoSans-W3",
