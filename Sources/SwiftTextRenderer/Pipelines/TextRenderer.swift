@@ -28,6 +28,7 @@ public enum TextRendererUtils {
         desc.fragmentFunction = mainFragFunction
         desc.colorAttachments[0].pixelFormat = .bgra8Unorm
         desc.vertexDescriptor = vertexDescriptor
+        desc.depthAttachmentPixelFormat = .depth32Float_stencil8
         return try! ShaderUtils.device.makeRenderPipelineState(descriptor: desc)
     }()
 }
