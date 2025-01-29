@@ -12,6 +12,13 @@ public enum SwiftTextRenderer {
         case zeroVertices
     }
     
+    public enum NormalizeMode: String, Hashable {
+        case none
+        case basedOnWidth
+        case basedOnHeight
+        case basedOnLarger
+    }
+    
     public static func getVertices(
         for text: String,
         fontName: String = "AppleSDGothicNeo-Bold",
@@ -22,7 +29,7 @@ public enum SwiftTextRenderer {
         verticalAlignment: PathText.VerticalAlignment = .center,
         kern: Float = 0.0,
         lineSpacing: Float = 0.0,
-        normalized: Bool
+        normalizeMode: NormalizeMode
     ) throws -> [f3] {
         let pathText = PathText(
             text: text,
@@ -47,7 +54,7 @@ public enum SwiftTextRenderer {
         if finalVertices.count == 0 {
             throw Error.zeroVertices
         }
-        if normalized {
+        if normalizeMode != .none {
             var largestX: Float = 0
             var largestY: Float = 0
             for vert in finalVertices {
@@ -58,8 +65,24 @@ public enum SwiftTextRenderer {
                     largestY = vert.y
                 }
             }
-            let finalVerticesNormalized = finalVertices.map { f3($0.x / largestX, $0.y / largestY, 0)}
-            return finalVerticesNormalized
+            switch normalizeMode {
+            case .basedOnWidth:
+                let ratio = largestY / largestX
+                return finalVertices.map { f3($0.x / largestX, $0.y * ratio, 0)}
+            case .basedOnHeight:
+                let ratio = largestX / largestY
+                return finalVertices.map { f3($0.x * ratio, $0.y / largestY, 0)}
+            case .basedOnLarger:
+                if largestX > largestY {
+                    let ratio = largestY / largestX
+                    return finalVertices.map { f3($0.x / largestX, $0.y * ratio, 0)}
+                } else {
+                    let ratio = largestX / largestY
+                    return finalVertices.map { f3($0.x * ratio, $0.y / largestY, 0)}
+                }
+            case .none:
+                throw Error.zeroVertices
+            }
         } else {
             return finalVertices
         }
