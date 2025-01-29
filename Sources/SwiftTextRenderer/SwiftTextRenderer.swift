@@ -68,17 +68,17 @@ public enum SwiftTextRenderer {
             switch normalizeMode {
             case .basedOnWidth:
                 let ratio = largestY / largestX
-                return finalVertices.map { f3($0.x / largestX, $0.y * ratio, 0)}
+                return finalVertices.map { f3($0.x / largestX, $0.y / largestY * ratio, 0)}
             case .basedOnHeight:
                 let ratio = largestX / largestY
-                return finalVertices.map { f3($0.x * ratio, $0.y / largestY, 0)}
+                return finalVertices.map { f3(-$0.x / largestX * ratio, -$0.y / largestY, 0)}
             case .basedOnLarger:
                 if largestX > largestY {
                     let ratio = largestY / largestX
-                    return finalVertices.map { f3($0.x / largestX, $0.y * ratio, 0)}
+                    return finalVertices.map { f3($0.x / largestX, $0.y / largestY * ratio, 0)}
                 } else {
                     let ratio = largestX / largestY
-                    return finalVertices.map { f3($0.x * ratio, $0.y / largestY, 0)}
+                    return finalVertices.map { f3(-$0.x / largestX * ratio, -$0.y / largestY, 0)}
                 }
             case .none:
                 throw Error.zeroVertices
