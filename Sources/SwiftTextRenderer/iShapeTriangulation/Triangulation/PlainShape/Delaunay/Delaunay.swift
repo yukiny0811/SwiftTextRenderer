@@ -8,7 +8,7 @@
 
 public struct Delaunay {
 
-    public internal (set) var points: [IntPoint]
+    public internal(set) var points: [IntPoint]
     var triangles: [Triangle]
     
     init(points: [IntPoint], triangles: [Triangle]) {
@@ -339,7 +339,7 @@ private struct IntList {
     
     private var buffer: UnsafeMutablePointer<Int>
     private var capacity: Int
-    private (set) var count: Int
+    private(set) var count: Int
 
     subscript(index: Int) -> Int {
         buffer[index]

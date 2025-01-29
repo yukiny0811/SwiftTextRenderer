@@ -25,9 +25,9 @@ public struct PlainShapeList {
         }
     }
 
-    public private (set) var points: [IntPoint]
-    public private (set) var layouts: [PlainShape.Layout]
-    public private (set) var segments: [Segment]
+    public private(set) var points: [IntPoint]
+    public private(set) var layouts: [PlainShape.Layout]
+    public private(set) var segments: [Segment]
     
     public init(minimumPointsCapacity: Int, minimumLayoutsCapacity: Int, minimumSegmentsCapacity: Int) {
         self.points = [IntPoint]()
